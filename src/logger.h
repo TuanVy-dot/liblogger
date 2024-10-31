@@ -67,7 +67,7 @@
  * Look below for parameters
  */
 
-#define DEFAULT_LOG_FORMAT "/[[REF]/]/[[LEVEL]/] - ([FILENAME]:[LINE])\n- [MSG]"
+#define DEFAULT_LOG_FORMAT "/[[REF]/]/[[LEVEL]/] - ([FILENAME]:[LINE])\n- [MSG]\n"
 
 #define logger_log(logger, level, msg, ...) \
 __logger_msg__(__FILE__, __LINE__, logger, level, msg, ##__VA_ARGS__)
@@ -94,21 +94,21 @@ enum LOGLEVEL {
 };
 
 typedef struct {
-    char *ref;
-    FILE *file; // destination file
-    Node *format; // printing format
+    const char *ref;
+    const FILE *file; // destination file
+    const Node *format; // printing format
     unsigned char level; // lowest level to be print
 } LOGGER;
 
 void __logger_msg__(const char *fname, int line, \
-                LOGGER logger, int level, const char *msg, ...);
-void logger_init(LOGGER *logger, char *ref, FILE *file, char *format, int level);
+                const LOGGER logger, int level, const char *msg, ...);
+void logger_init(LOGGER *logger, const char *ref, const FILE *file, const char *format, const int level);
 void logger_remove(LOGGER *logger);
-void logger_change_file(LOGGER *logger, FILE *file);
-void logger_change_format(LOGGER *logger, char *format);
-void logger_change_level(LOGGER *logger, int level);
-void logger_change_ffl(LOGGER *logger, FILE *file, char *format, int level);
-void logger_level_color(int level, char *ansi_code);
+void logger_change_file(LOGGER *logger, const FILE *file);
+void logger_change_format(LOGGER *logger, const char *format);
+void logger_change_level(LOGGER *logger, const int level);
+void logger_change_ffl(LOGGER *logger, const FILE *file, const char *format, const int level);
+void logger_level_color(const int level, const char *ansi_code);
 void logger_level_color_default(void);
 void logger_level_color_reset(void);
 

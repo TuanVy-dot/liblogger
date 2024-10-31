@@ -20,12 +20,12 @@ void linked_list_print(Node *head) {
     }
 }
 
-void linked_list_free(Node *head) {
-    Node *curr = head;
-    Node *prev = NULL;
+void linked_list_free(const Node *head) {
+    const Node *curr = head;
+    const Node *prev = NULL;
     while (curr) {
         prev = curr;
         curr = curr -> next;
-        free(prev);
+        free((Node*)prev); // casting just to avoid warnings
     }
 }

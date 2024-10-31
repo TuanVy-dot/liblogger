@@ -8,13 +8,13 @@ enum NODETYPE {
 };
 
 typedef struct Node {
-    char *string;
+    const char *string;
     char type;
     struct Node *next;
 } Node;
 
 void linked_list_add(Node *head, Node *node);
 void linked_list_print(Node *head);
-void linked_list_free(Node *head);
+void linked_list_free(const Node *head);
 
 #endif

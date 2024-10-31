@@ -6,6 +6,11 @@
 #include <stdarg.h>
 #include <time.h>
 
+/* 
+ * CASTING IN PRINTF, FREE OR OTHER STD FUNCTIONS ARE JUST FOR
+ * REMOVE THE CONST QUALIFIER AND REMOVE COMPILE WARNING
+ */
+
 #define LOGGER_DEFAULT_TRACE   "\033[0;37m"  // Light Gray
 #define LOGGER_DEFAULT_DEBUG   "\033[0;34m"  // Blue
 #define LOGGER_DEFAULT_INFO    "\033[0;32m"  // Green
@@ -14,9 +19,9 @@
 #define LOGGER_DEFAULT_FATAL   "\033[1;31m"  // Bold Red
 #define LOGGER_RESET           "\033[0m"      // Reset Color
 
-static char *LOGGER_LEVEL_COLORS[6] = {0};
+static const char *LOGGER_LEVEL_COLORS[6] = {0};
 
-char *LOGGER_INFO_LABELS[] = {
+const char *LOGGER_INFO_LABELS[] = {
     "REF", "LEVEL", "DATE", "TIME", "FILENAME", "LINE", "MSG"
 };
 
@@ -24,27 +29,27 @@ enum LOGGER_INF_LABELS_ID {
     REF, LEVEL, DATE, TIME, FILENAME, LINE, MSG
 };
 
-static Node *logger_formatter(char*);
-static int logger_getID(char*);
-void logger_init(LOGGER *logger, char *ref, FILE *file, char *format, int level);
-static char *logger_level_to_string(int level);
-void __logger_msg__(const char *fname, int line, \
-    LOGGER logger, int level, const char *msg, ...);
-static Node *logger_formatter(char *s);
+static Node *logger_formatter(const char*);
+static int logger_getID(const char*);
+void logger_init(LOGGER *logger, const char *ref, const FILE *file, const char *format, const int level);
+static char *logger_level_to_string(const int level);
+void __logger_msg__(const char *fname, const int line, \
+    const LOGGER logger, const int level, const char *msg, ...);
+static Node *logger_formatter(const char *s);
 void logger_remove(LOGGER *logger);
-void logger_change_file(LOGGER *logger, FILE *file);
-void logger_change_format(LOGGER *logger, char *format);
-void logger_change_level(LOGGER *logger, int level);
-void logger_change_ffl(LOGGER *logger, FILE *file, char *format, int level);
+void logger_change_file(LOGGER *logger, const FILE *file);
+void logger_change_format(LOGGER *logger, const char *format);
+void logger_change_level(LOGGER *logger, const int level);
+void logger_change_ffl(LOGGER *logger, const FILE *file, const char *format, const int level);
 void logger_level_color_default(void);
-void logger_level_color(int level, char *ansi_code);
+void logger_level_color(const int level, const char *ansi_code);
 void logger_level_color_reset(void);
 
 void logger_level_color_reset(void) {
     memset(LOGGER_LEVEL_COLORS, 0, 6);
 }
 
-void logger_level_color(int level, char *ansi_code) {
+void logger_level_color(const int level, const char *ansi_code) {
     if (level < 0 || level >= OFF) {
         return;
     }
@@ -60,7 +65,7 @@ void logger_level_color_default(void) {
     LOGGER_LEVEL_COLORS[5] = LOGGER_DEFAULT_FATAL;
 }
 
-void logger_change_ffl(LOGGER *logger, FILE *file, char *format, int level) {
+void logger_change_ffl(LOGGER *logger, const FILE *file, const char *format, const int level) {
     if (file) {
         logger_change_file(logger, file);
     }
@@ -74,28 +79,30 @@ void logger_change_ffl(LOGGER *logger, FILE *file, char *format, int level) {
     }
 }
 
-void logger_change_level(LOGGER *logger, int level) {
+void logger_change_level(LOGGER *logger, const int level) {
     if (level == -1) {
         return;
     }
     if (level < TRACE && level > OFF) {
-        printf("[ROOT] Invalid initiallizer 'level', should be one of those:\n"\
+        fprintf((FILE*)logger -> file, "[ROOT] Invalid initiallizer 'level', should be one of those:\n"\
                 "TRACE, DEBUG, INFO, ERROR, WARNING, FATAL, OFF");
-        level = OFF;
+        // casting just to avoid compilers warning(I hate this!)
+        logger -> level = OFF;
+        return;
     }
     logger -> level = level;
 }
 
-void logger_change_format(LOGGER *logger, char *format) {
+void logger_change_format(LOGGER *logger, const char *format) {
     if (!format) {
         return;
     }
-    linked_list_free(logger -> format);
+    linked_list_free((Node*)logger -> format);
     Node *parsed_format = logger_formatter(format);
     logger -> format = parsed_format;
 }
 
-void logger_change_file(LOGGER *logger, FILE *file) {
+void logger_change_file(LOGGER *logger, const FILE *file) {
     if (!file) {
         return;
     }
@@ -106,7 +113,7 @@ void logger_remove(LOGGER *logger) {
     linked_list_free(logger -> format);
 }
 
-static int logger_getID(char *s) {
+static int logger_getID(const char *s) {
     int i;
     for (i = 0; i < sizeof(LOGGER_INFO_LABELS)/sizeof(LOGGER_INFO_LABELS[0]); i++) {
         if (strcmp(s, LOGGER_INFO_LABELS[i]) == 0) {
@@ -116,14 +123,13 @@ static int logger_getID(char *s) {
     return -1;
 }
 
-void logger_init(LOGGER *logger, char *ref, FILE *file, char *format, int level) {
+void logger_init(LOGGER *logger, const char *ref, const FILE *file, const char *format, const int level) {
     logger -> ref = ref;
     logger -> file = file;
     Node *parsed_format = logger_formatter(format);
     logger -> format = parsed_format;
-    if (level > OFF) {
-        printf("[ROOT] Invalid initiallizer 'level', should be one of those:\n"\
-                "TRACE, DEBUG, INFO, ERROR, WARNING, FATAL, OFF");
+    if (level > OFF || level < TRACE) {
+        fprintf((FILE*)logger -> file, "[ROOT] Invalid initiallizer 'level', should be one of those:\nTRACE, DEBUG, INFO, ERROR, WARNING, FATAL, OFF");
         logger -> level = OFF;
         return;
     }
@@ -173,11 +179,10 @@ static char *logger_level_to_string(int level) {
     return p;
 }
 
-void __logger_msg__(const char *fname, int line, \
-    LOGGER logger, int level, const char *msg, ...) {
+void __logger_msg__(const char *fname, const int line, \
+    LOGGER logger, const int level, const char *msg, ...) {
     if (level > OFF) {
-        printf("[ROOT] Invalid initiallizer 'level', should be one of those:\n"\
-                "TRACE, DEBUG, INFO, ERROR, WARNING, FATAL, OFF");
+        fprintf((FILE*)(FILE*)logger.file, "[ROOT] Invalid initiallizer 'level', should be one of those:\nTRACE, DEBUG, INFO, ERROR, WARNING, FATAL, OFF");
         return;
     }
     if (level < logger.level || level == OFF) {
@@ -195,33 +200,33 @@ void __logger_msg__(const char *fname, int line, \
     strftime(date_str, 26, "%Y-%m-%d", tm_info);
 
     char *level_str = logger_level_to_string(level);
-    Node *curr = logger.format;
+    const Node *curr = logger.format;
     while (curr) {
         if (curr -> type == LITERAL) {
-            fprintf(logger.file, "%s", curr -> string);
+            fprintf((FILE*)logger.file, "%s", curr -> string);
         } else {
             int ID = logger_getID(curr -> string);
             switch (ID) {
                 case REF:
-                    fprintf(logger.file, "%s", logger.ref);
+                    fprintf((FILE*)logger.file, "%s", logger.ref);
                     break;
                 case LEVEL:
-                    fprintf(logger.file, "%s", level_str);
+                    fprintf((FILE*)logger.file, "%s", level_str);
                     break;
                 case DATE:
-                    fprintf(logger.file, "%s", date_str);
+                    fprintf((FILE*)logger.file, "%s", date_str);
                     break;
                 case TIME:
-                    fprintf(logger.file, "%s", time_str);
+                    fprintf((FILE*)logger.file, "%s", time_str);
                     break;
                 case FILENAME:
-                    fprintf(logger.file, "%s", fname);
+                    fprintf((FILE*)logger.file, "%s", fname);
                     break;
                 case LINE:
-                    fprintf(logger.file, "%d", line);
+                    fprintf((FILE*)logger.file, "%d", line);
                     break;
                 case MSG:
-                    vfprintf(logger.file, msg, args);
+                    vfprintf((FILE*)logger.file, msg, args);
                     break;
             }
         }
@@ -233,7 +238,7 @@ void __logger_msg__(const char *fname, int line, \
 
 
 /* Take a string and turn it into a linked list having the format */
-static Node *logger_formatter(char *s) {
+static Node *logger_formatter(const char *s) {
     if (!s) return NULL;
     
     Node *pHead = malloc(sizeof(Node));
@@ -287,7 +292,7 @@ static Node *logger_formatter(char *s) {
             s += 2;
         } else if (*s == '[') {
             s++;
-            char *sp = s;
+            const char *sp = s;
             int len = 0;
             
             while (*s && *s != ']') {
@@ -322,7 +327,7 @@ static Node *logger_formatter(char *s) {
             
             s++;
         } else {
-            char *sp = s;
+            const char *sp = s;
             int len = 0;
             
             while (*s && 
