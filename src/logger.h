@@ -1,10 +1,13 @@
 #ifndef LOGGER
 
 #include <stdio.h>
-#include "linked_list.h"
 #include <stdarg.h>
 
 /*
+ *
+ * A lightweight logging module that is just simply a better printf!
+ *
+ * NO MULTI THREADS SAFETY IMPLEMENTED
  * YOU MUST USE logger_delete TO REMOVE A LOGGER
  * it used memory allocation and will lead to memory leak otherwise
  * It does not free the file pointer and reference, by the way, and you have to
@@ -12,18 +15,16 @@
  *
  * When you want to change some values of a logger:
  * DO NOT use logger_init it cause memory leaks because it will not free the pointer
- * DO NOT change values directly, it can be undefined
- * Instead use logger_change_format, logger_change_file, logger_change_level
- * or logger_change_ffl (put NULL to not change something or -1 in case of int)
+ * To change something, use logger_change_format, logger_change_file, 
+ * logger_change_level, logger_change_ref
+ * or logger_change_rffl (put NULL to not change something or -1 in case of int)
  * DO NOT use those if the logger is not initiallized using logger_init
  * It will free the pointers which should not be static or unallocated
  * It does not free the file though so it is fine.
- * reference of a logger SHOULD NOT be change because why would you ever want that?
- * But you are free to do so by change the value of the struct LOGGER
- * mylg.ref = str;
- * Just don't forget to free if it is allocated
+ * Change the reference using logger_change_ref, just be careful about memory
+ * it does not free
  *
- * See prototypes for more infos
+ * See prototypes for more info about arguements
  *
  * How to use:
  * Declare a LOGGER variable (can be global)
@@ -92,23 +93,20 @@ __logger_msg__(__FILE__, __LINE__, logger, FATAL, msg, ##__VA_ARGS__)
 enum LOGLEVEL {
     TRACE, DEBUG, INFO, WARNING, ERROR, FATAL, OFF
 };
+typedef enum LOGLEVEL log_level_t;
 
-typedef struct {
-    const char *ref;
-    const FILE *file; // destination file
-    const Node *format; // printing format
-    unsigned char level; // lowest level to be print
-} LOGGER;
+typedef struct {} LOGGER;
 
 void __logger_msg__(const char *fname, int line, \
-                const LOGGER logger, int level, const char *msg, ...);
-void logger_init(LOGGER *logger, const char *ref, const FILE *file, const char *format, const int level);
+                const LOGGER *logger, const log_level_t level, const char *msg, ...);
+LOGGER *logger_create(const char *ref, const FILE *file, const char *format, const log_level_t level);
 void logger_remove(LOGGER *logger);
 void logger_change_file(LOGGER *logger, const FILE *file);
 void logger_change_format(LOGGER *logger, const char *format);
 void logger_change_level(LOGGER *logger, const int level);
-void logger_change_ffl(LOGGER *logger, const FILE *file, const char *format, const int level);
-void logger_level_color(const int level, const char *ansi_code);
+void logger_change_ref(LOGGER *logger, const char *ref);
+void logger_change_rffl(LOGGER *logger, const char *ref, const FILE *file, const char *format, const int level);
+void logger_level_color(const log_level_t level, const char *ansi_code);
 void logger_level_color_default(void);
 void logger_level_color_reset(void);
 
