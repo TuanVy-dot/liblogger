@@ -1,0 +1,8 @@
+*.o
+*.out
+*.exe
+bin/
+tests/
+test/
+test*
+*.txt
