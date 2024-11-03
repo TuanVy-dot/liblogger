@@ -10,32 +10,26 @@
  * NO MULTI THREADS SAFETY IMPLEMENTED
  * YOU MUST USE logger_delete TO REMOVE A LOGGER
  * it used memory allocation and will lead to memory leak otherwise
- * It does not free the file pointer and reference, by the way, and you have to
- * free the struct yourself
+ * It does not free the file pointers and references
  *
  * When you want to change some values of a logger:
- * DO NOT use logger_init it cause memory leaks because it will not free the pointer
- * To change something, use logger_change_format, logger_change_file, 
+ * use logger_change_format, logger_change_file, 
  * logger_change_level, logger_change_ref
  * or logger_change_rffl (put NULL to not change something or -1 in case of int)
- * DO NOT use those if the logger is not initiallized using logger_init
- * It will free the pointers which should not be static or unallocated
- * It does not free the file though so it is fine.
  * Change the reference using logger_change_ref, just be careful about memory
  * it does not free
  *
  * See prototypes for more info about arguements
  *
  * How to use:
- * Declare a LOGGER variable (can be global)
- * LOGGER mylogger;
+ * Declare a LOGGER* variable (can be global)
+ * LOGGER *mylogger;
  * Then inside a function that gonna get run, use
- * logger_init(LOGGER*, char *ref, FILE *file, char *format, int level)
- * LOGGER* - a pointer to the logger
+ * mylogger = logger_create(char *ref, FILE *file, char *format, log_level_t level)
  * char *ref - reference of the logger, use in format
  * FILE *file - a file pointer that gonna get write to
  * char *format - format of logging messages
- * int level - The lowest level that going to get print by that logger
+ * log_level_t level - The lowest level that going to get print by that logger
  *
  * Format:
  * Use those keywords:
@@ -97,18 +91,44 @@ typedef enum LOGLEVEL log_level_t;
 
 typedef struct {} LOGGER;
 
+/* Order here is not the same in the source (I am sorry) 
+ * I will try to be more organize on later versions */
+
+/* FUNCTIONALITIES */
+LOGGER *logger_create(const char *ref, const FILE *file, const char *format, const log_level_t level);
+/* Logger creation and initiallization 
+ * Return the logger or
+ * NULL if fail */
+
+void logger_remove(LOGGER *logger);
+/* Logger removal
+ * free the format(as it is linked list) and the logger */
+
+
 void __logger_msg__(const char *fname, int line, \
                 const LOGGER *logger, const log_level_t level, const char *msg, ...);
-LOGGER *logger_create(const char *ref, const FILE *file, const char *format, const log_level_t level);
-void logger_remove(LOGGER *logger);
+/* print the log message
+ * Print the msg with format defined in logger if level > logger's level 
+ * Support formatted string, this is not suppose to be call, use macros instead */
+
+/* Change logger param */
 void logger_change_file(LOGGER *logger, const FILE *file);
 void logger_change_format(LOGGER *logger, const char *format);
 void logger_change_level(LOGGER *logger, const int level);
 void logger_change_ref(LOGGER *logger, const char *ref);
 void logger_change_rffl(LOGGER *logger, const char *ref, const FILE *file, const char *format, const int level);
+/* Those are self-explanatory, paste NULL or -1 to keep it unchanged */
+
+/* Coloring levels label */
 void logger_level_color(const log_level_t level, const char *ansi_code);
+/* change color of a level */
 void logger_level_color_default(void);
+/* use default color */
 void logger_level_color_reset(void);
+/* no color */
+/* Though I called it color, any string will work
+ * it basically prefix the label with const char *ansj_code
+ * So you can make it "level: " and it will be level: INFO\033[0m */
 
 #endif
 
