@@ -64,32 +64,51 @@
 
 #define DEFAULT_LOG_FORMAT "/[[REF]/]/[[LEVEL]/] - ([FILENAME]:[LINE])\n- [MSG]\n"
 
-#define logger_log(logger, level, msg, ...) \
-__logger_msg__(__FILE__, __LINE__, logger, level, msg, ##__VA_ARGS__)
-// automatic parameters for log call, you should use this instead
-// of calling directly the __logger_msg__
-// or use the following
+/* FORMATTED LOG MESSAGES 
+ * You must provide at least 1 variadic arguement
+ * If you don't, use the unformatted one
+ * Just the way macros work in standard C 
+ * (I trying to remove all extensions usage) */
+#define logger_logf(logger, level, msg, ...) \
+__logger_msg__(__FILE__, __LINE__, logger, level, msg, __VA_ARGS__)
+// Use this instead of __logger_msg__
 
-/* Convinient macros for logging (automatic logging level) */
-#define logger_trace(logger, msg, ...) \
-__logger_msg__(__FILE__, __LINE__, logger, TRACE, msg, ##__VA_ARGS__)
-#define logger_debug(logger, msg, ...) \
-__logger_msg__(__FILE__, __LINE__, logger, DEBUG, msg, ##__VA_ARGS__)
-#define logger_info(logger, msg, ...) \
-__logger_msg__(__FILE__, __LINE__, logger, INFO, msg, ##__VA_ARGS__)
-#define logger_warning(logger, msg, ...) \
-__logger_msg__(__FILE__, __LINE__, logger, WARNING, msg, ##__VA_ARGS__)
-#define logger_error(logger, msg, ...) \
-__logger_msg__(__FILE__, __LINE__, logger, ERROR, msg, ##__VA_ARGS__)
-#define logger_fatal(logger, msg, ...) \
-__logger_msg__(__FILE__, __LINE__, logger, FATAL, msg, ##__VA_ARGS__)
+#define logger_tracef(logger, msg, ...) \
+__logger_msg__(__FILE__, __LINE__, logger, TRACE, msg, __VA_ARGS__)
+#define logger_debugf(logger, msg, ...) \
+__logger_msg__(__FILE__, __LINE__, logger, DEBUG, msg, __VA_ARGS__)
+#define logger_infof(logger, msg, ...) \
+__logger_msg__(__FILE__, __LINE__, logger, INFO, msg, __VA_ARGS__)
+#define logger_warningf(logger, msg, ...) \
+__logger_msg__(__FILE__, __LINE__, logger, WARNING, msg, __VA_ARGS__)
+#define logger_errorf(logger, msg, ...) \
+__logger_msg__(__FILE__, __LINE__, logger, ERROR, msg, __VA_ARGS__)
+#define logger_fatalf(logger, msg, ...) \
+__logger_msg__(__FILE__, __LINE__, logger, FATAL, msg, __VA_ARGS__)
+
+#define logger_log(logger, level, msg) \
+__logger_msg__(__FILE__, __LINE__, logger, level, msg)
+// Use this instead of __logger_msg__
+
+#define logger_trace(logger, msg) \
+__logger_msg__(__FILE__, __LINE__, logger, TRACE, msg)
+#define logger_debug(logger, msg) \
+__logger_msg__(__FILE__, __LINE__, logger, DEBUG, msg)
+#define logger_info(logger, msg) \
+__logger_msg__(__FILE__, __LINE__, logger, INFO, msg)
+#define logger_warning(logger, msg) \
+__logger_msg__(__FILE__, __LINE__, logger, WARNING, msg)
+#define logger_error(logger, msg) \
+__logger_msg__(__FILE__, __LINE__, logger, ERROR, msg)
+#define logger_fatal(logger, msg) \
+__logger_msg__(__FILE__, __LINE__, logger, FATAL, msg)
 
 enum LOGLEVEL {
     TRACE, DEBUG, INFO, WARNING, ERROR, FATAL, OFF
 };
 typedef enum LOGLEVEL log_level_t;
 
-typedef struct {} LOGGER;
+typedef struct LOGGER LOGGER;
 
 /* Order here is not the same in the source (I am sorry) 
  * I will try to be more organize on later versions */

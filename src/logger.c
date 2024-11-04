@@ -86,7 +86,7 @@ void logger_change_level(LOGGER *logger, const int level) {
     if (level == -1) {
         return;
     }
-    if (level < TRACE && level > OFF) {
+    if (level < TRACE || level > OFF) {
         logger_imp -> level = OFF;
         return;
     }
@@ -126,7 +126,7 @@ void logger_remove(LOGGER *logger) {
 }
 
 static int logger_getID(const char *s) {
-    int i;
+    size_t i;
     for (i = 0; i < sizeof(LOGGER_INFO_LABELS)/sizeof(LOGGER_INFO_LABELS[0]); i++) {
         if (strcmp(s, LOGGER_INFO_LABELS[i]) == 0) {
             return i;

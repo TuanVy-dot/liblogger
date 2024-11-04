@@ -1,5 +1,7 @@
 CC = gcc
 
+CC_FLAGS= -Wall -Wextra -Wpedantic -Werror -c
+
 SRC_DIR = src
 BUILD_DIR = bin
 
@@ -15,11 +17,11 @@ libdebug: $(DEBUG_OBJECTS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(BUILD_DIR)
-	$(CC) -c $< -o $@ -fPIC
+	$(CC) $(CC_FLAGS) $< -o $@ -fPIC
 
 $(BUILD_DIR)/DEBUG/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(BUILD_DIR)/DEBUG
-	$(CC) -c $< -o $@ -fPIC -g
+	$(CC) $(CC_FLAGS) $< -o $@ -fPIC -g
 
 .PHONY: clean
 clean:
