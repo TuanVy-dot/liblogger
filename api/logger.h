@@ -132,11 +132,11 @@ __logger_log_array__(__FILE__, __LINE__, logger, level, array, element_size, len
 (void (*)(FILE *, void *))func, msg, __VA_ARGS__)
 
 /* Default printers for array logging */
-#define PRINT_C __logger_print_ch__
+#define PRINT_C __logger_print_c__
 #define PRINT_D __logger_print_i__
 #define PRINT_F __logger_print_f__
 #define PRINT_S __logger_print_s__
-#define PRINT_P __logger_print_ptr__
+#define PRINT_P __logger_print_p__
 
 
 enum LOGLEVEL {
@@ -192,11 +192,11 @@ void logger_level_color_reset(void);
 
 /* PRINTERS */
 /* Those functions are just wrappers for printf with specifiers */
-void __logger_print_ch__(FILE *f, char *pCh); /* print as ASCII char %c specifier */
+void __logger_print_c__(FILE *f, char *pCh); /* print as ASCII char %c specifier */
 void __logger_print_i__(FILE *f, int *pI); /* print using %d specifier */
 void __logger_print_f__(FILE *f, double *pF); /* print using %f specifier (same as %lf) */
-void __logger_print_str__(FILE *f, char **pS); /* print using %s specifier */
-void __logger_print_ptr__(FILE *f, void **pPtr); /* print using %p specifiers */
+void __logger_print_s__(FILE *f, char **pS); /* print using %s specifier */
+void __logger_print_p__(FILE *f, void **pPtr); /* print using %p specifiers */
 
 #endif
 
