@@ -58,6 +58,26 @@
  *
  * The colors are set globally to all loggers
  *
+ * v2.1.0
+ * Array logging
+ * You can log an array using this function
+ * void __logger_log_array__(const char *fname, const int line, 
+ *                           const LOGGER *logger, const log_level_t level, 
+ *                           void *array, size_t element_size, size_t len,
+ *                           void (*print_element)(FILE *, void *),
+ *                           const char *msg, ...);
+ * via the macros
+ * logger_array(logger, level, array, element_size, len, func, msg) \
+ * __logger_log_array__(__FILE__, __LINE__, logger, level, array, element_size, len, \
+ * (void (*)(FILE *, void *))func, msg)
+ * logger_arrayf(logger, level, array, element_size, len, func, msg, ...) \
+ * __logger_log_array__(__FILE__, __LINE__, logger, level, array, element_size, len, \
+ * (void (*)(FILE *, void *))func, msg, __VA_ARGS__)
+ * All it does is print the message, then call print_element
+ * for each of the member of the array
+ * The function pass in should expect a FILE *fp and a pointer to the type being print out
+ *
+ *
  * Look below for parameters
  */
 
@@ -102,6 +122,23 @@ __logger_msg__(__FILE__, __LINE__, logger, ERROR, msg)
 #define logger_fatal(logger, msg) \
 __logger_msg__(__FILE__, __LINE__, logger, FATAL, msg)
 
+/* array logging */
+
+#define logger_array(logger, level, array, element_size, len, func, msg) \
+__logger_log_array__(__FILE__, __LINE__, logger, level, array, element_size, len, \
+(void (*)(FILE *, void *))func, msg)
+#define logger_arrayf(logger, level, array, element_size, len, func, msg, ...) \
+__logger_log_array__(__FILE__, __LINE__, logger, level, array, element_size, len, \
+(void (*)(FILE *, void *))func, msg, __VA_ARGS__)
+
+/* Default printers for array logging */
+#define PRINT_C __logger_print_ch__ /* wrapper for printf("%c") */
+#define PRINT_D __logger_print_i__ /* wrapper for printf("%i") */
+#define PRINT_F __logger_print_f__ /* wrapper for printf("%f") */
+#define PRINT_S __logger_print_s__ /* wrapper for printf("%s") */
+#define PRINT_P __logger_print_ptr__ /* wrapper for printf("%p") */
+
+
 enum LOGLEVEL {
     TRACE, DEBUG, INFO, WARNING, ERROR, FATAL, OFF
 };
@@ -109,25 +146,29 @@ typedef enum LOGLEVEL log_level_t;
 
 typedef struct LOGGER LOGGER;
 
-/* Order here is not the same in the source (I am sorry) 
- * I will try to be more organize on later versions */
+/* LOGGERS */
 
-/* FUNCTIONALITIES */
-LOGGER *logger_create(const char *ref, const FILE *file, const char *format, const log_level_t level);
 /* Logger creation and initiallization 
  * Return the logger or
  * NULL if fail */
+LOGGER *logger_create(const char *ref, const FILE *file, const char *format, const log_level_t level);
 
-void logger_remove(LOGGER *logger);
 /* Logger removal
  * free the format(as it is linked list) and the logger */
+void logger_remove(LOGGER *logger);
 
 
-void __logger_msg__(const char *fname, int line, \
-                const LOGGER *logger, const log_level_t level, const char *msg, ...);
 /* print the log message
  * Print the msg with format defined in logger if level > logger's level 
  * Support formatted string, this is not suppose to be call, use macros instead */
+void __logger_msg__(const char *fname, int line, \
+                    const LOGGER *logger, const log_level_t level,
+                    const char *msg, ...);
+/* log an array, run print_element to every array element */
+void __logger_log_array__(const char *fname, const int line, 
+                          const LOGGER *logger, const log_level_t level, 
+                          void *array, size_t element_size, size_t len,
+                          void (*print_element)(FILE *, void *), const char *msg, ...);
 
 /* Change logger param */
 void logger_change_file(LOGGER *logger, const FILE *file);
@@ -138,15 +179,24 @@ void logger_change_rffl(LOGGER *logger, const char *ref, const FILE *file, const
 /* Those are self-explanatory, paste NULL or -1 to keep it unchanged */
 
 /* Coloring levels label */
-void logger_level_color(const log_level_t level, const char *ansi_code);
+
 /* change color of a level */
-void logger_level_color_default(void);
+void logger_level_color(const log_level_t level, const char *ansi_code);
 /* use default color */
-void logger_level_color_reset(void);
+void logger_level_color_default(void);
 /* no color */
 /* Though I called it color, any string will work
  * it basically prefix the label with const char *ansj_code
  * So you can make it "level: " and it will be level: INFO\033[0m */
+void logger_level_color_reset(void);
+
+/* PRINTERS */
+/* Those functions are just wrappers for printf with specifiers */
+void __logger_print_ch__(FILE *f, char *pCh); /* print as ASCII char %c specifier */
+void __logger_print_i__(FILE *f, int *pI); /* print using %d specifier */
+void __logger_print_f__(FILE *f, double *pF); /* print using %f specifier (same as %lf) */
+void __logger_print_str__(FILE *f, char **pS); /* print using %s specifier */
+void __logger_print_ptr__(FILE *f, void **pPtr); /* print using %p specifiers */
 
 #endif
 

@@ -2,7 +2,11 @@
 
 `liblogger` is a lightweight and ease of use C logging library (hence not the most efficient). It support coloring using ANSI escape sequences, log levels and multiple loggers. With a little set up, it can be ready to use.
 
-current version: 2.0.0
+current version: 2.1.0
+
+What new?
+
+- Added log array allow you to print an array automatically
 
 Key features:
 1. Lightweight Logging: Designed to enhance the standard printf functionality with more structured logging capabilities.
