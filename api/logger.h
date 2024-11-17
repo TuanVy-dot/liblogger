@@ -1,7 +1,6 @@
 #ifndef LOGGER
 
 #include <stdio.h>
-#include <stdarg.h>
 
 /*
  *
