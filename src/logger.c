@@ -39,9 +39,9 @@ enum LOGGER_INF_LABELS_ID {
 static int logger_getID(const char*);
 static char *logger_level_to_string(const int level);
 static Node *logger_formatter(const char *s);
-static void __logger_print_msg__(const char *fname, const int line, 
-                                 const LOGGER *logger, const log_level_t level, 
-                                 const char *msg, va_list args);
+static void logger_print_msg(const char *fname, const int line, 
+                             const LOGGER *logger, const log_level_t level, 
+                             const char *msg, va_list args);
 
 
 /* Create a logger using the given parameters */
@@ -74,7 +74,7 @@ void __logger_msg__(const char *fname, const int line,
     const LOGGER *logger, const log_level_t level, const char *msg, ...) {
     va_list args;
     va_start(args, msg);
-    __logger_print_msg__(fname, line, logger, level, msg, args);
+    logger_print_msg(fname, line, logger, level, msg, args);
 }
 
 
@@ -86,13 +86,13 @@ void __logger_log_array__(const char *fname, const int line,
     FILE *fp = ((lgimp_t *)logger) -> file;
     va_list args;
     va_start(args, msg);
-    __logger_print_msg__(fname, line, logger, level, msg, args);
+    logger_print_msg(fname, line, logger, level, msg, args);
+
     for (int i = 0; i < len; i++) {
-        printf("%d: \n", i);
-        print_element(fp, array);
-        array += element_size;
+        fprintf(fp, "i%d: ", i);
+        print_element(fp, (char *)array);
+        array = (char *)array + element_size;
     }
-    putc('\n', fp);
 }
 
 
@@ -365,8 +365,9 @@ static Node *logger_formatter(const char *s) {
 
 
 /* print a log message */
-static void __logger_print_msg__(const char *fname, const int line, 
-    const LOGGER *logger, const log_level_t level, const char *msg, va_list args) {
+static void logger_print_msg(const char *fname, const int line, 
+                             const LOGGER *logger, const log_level_t level, 
+                             const char *msg, va_list args) {
     lgimp_t *logger_imp = (lgimp_t*)logger;
     if (level < logger_imp -> level || level == OFF) {
         return;

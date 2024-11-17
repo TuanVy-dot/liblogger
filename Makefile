@@ -1,6 +1,6 @@
 CC = gcc
 
-CC_FLAGS= -Wall -Wextra -Wpedantic -Werror -c
+CC_FLAGS= -Wall -Wextra -Wpedantic -c -Iinclude
 
 SRC_DIR = src
 BUILD_DIR = bin

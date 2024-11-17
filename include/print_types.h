@@ -4,8 +4,6 @@
 
 #include <stdio.h>
 
-#define PCHR &print
-
 /* Those functions are just wrappers for printf with specifiers */
 void __logger_print_ch__(FILE *f, char *pCh); /* print as ASCII char %c specifier */
 void __logger_print_i__(FILE *f, int *pI); /* print using %d specifier */
