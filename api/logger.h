@@ -132,11 +132,11 @@ __logger_log_array__(__FILE__, __LINE__, logger, level, array, element_size, len
 (void (*)(FILE *, void *))func, msg, __VA_ARGS__)
 
 /* Default printers for array logging */
-#define PRINT_C __logger_print_ch__ /* wrapper for printf("%c") */
-#define PRINT_D __logger_print_i__ /* wrapper for printf("%i") */
-#define PRINT_F __logger_print_f__ /* wrapper for printf("%f") */
-#define PRINT_S __logger_print_s__ /* wrapper for printf("%s") */
-#define PRINT_P __logger_print_ptr__ /* wrapper for printf("%p") */
+#define PRINT_C __logger_print_ch__
+#define PRINT_D __logger_print_i__
+#define PRINT_F __logger_print_f__
+#define PRINT_S __logger_print_s__
+#define PRINT_P __logger_print_ptr__
 
 
 enum LOGLEVEL {

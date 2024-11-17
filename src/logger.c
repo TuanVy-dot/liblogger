@@ -88,7 +88,7 @@ void __logger_log_array__(const char *fname, const int line,
     va_start(args, msg);
     logger_print_msg(fname, line, logger, level, msg, args);
 
-    for (int i = 0; i < len; i++) {
+    for (unsigned int i = 0; i < len; i++) {
         fprintf(fp, "i%d: ", i);
         print_element(fp, (char *)array);
         array = (char *)array + element_size;
